@@ -35,6 +35,8 @@ import java.text.NumberFormat
 fun ChooseMenuScreen(
     options: List<MenuItem>,
     onSelectionChanged: (MenuItem) -> Unit,
+    onCancelButtonClicked: () -> Unit = {},
+    onNextButtonClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var selectedItemName by rememberSaveable { mutableStateOf("") }
@@ -60,8 +62,8 @@ fun ChooseMenuScreen(
         Spacer(modifier = Modifier.weight(1f))
         MenuScreenButtonGroup(
             selectedItemName = selectedItemName,
-            onCancelButtonClicked = { /* TODO */ },
-            onNextButtonClicked = { /* TODO */ },
+            onCancelButtonClicked = { onCancelButtonClicked },
+            onNextButtonClicked = { onNextButtonClicked },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -124,7 +126,6 @@ fun MenuScreenButtonGroup(
         }
         Button(
             modifier = Modifier.weight(1f),
-            // the button is enabled when the user makes a selection
             enabled = selectedItemName.isNotEmpty(),
             onClick = onNextButtonClicked
         ) {

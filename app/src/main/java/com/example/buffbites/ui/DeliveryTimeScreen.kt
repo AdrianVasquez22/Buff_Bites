@@ -32,6 +32,8 @@ fun ChooseDeliveryTimeScreen(
     subtotal: Double,
     options: List<String>,
     onSelectionChanged: (String) -> Unit = {},
+    onCancelButtonClicked: () -> Unit = {},
+    onNextButtonClicked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedValue by rememberSaveable { mutableStateOf("") }
@@ -40,7 +42,7 @@ fun ChooseDeliveryTimeScreen(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column() {
+        Column {
             Text(
                 text = stringResource(R.string.select_a_delivery_time)
             )
@@ -87,15 +89,14 @@ fun ChooseDeliveryTimeScreen(
         ) {
             OutlinedButton(
                 modifier = Modifier.weight(1f),
-                onClick = { /* TODO */ }
+                onClick = onCancelButtonClicked
             ) {
                 Text(stringResource(R.string.cancel))
             }
             Button(
                 modifier = Modifier.weight(1f),
-                // the button is enabed when the user makes a selection
                 enabled = selectedValue.isNotEmpty(),
-                onClick = { /* TODO */ }
+                onClick =  onNextButtonClicked
             ) {
                 Text(stringResource(R.string.next))
             }

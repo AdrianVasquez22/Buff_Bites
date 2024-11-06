@@ -31,6 +31,7 @@ import com.example.buffbites.ui.theme.BuffBitesTheme
 @Composable
 fun StartOrderScreen(
     restaurantOptions: List<Restaurant>,
+    onNextButtonClicked: (Restaurant) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -60,12 +61,12 @@ fun StartOrderScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                restaurantOptions.forEach {
+                restaurantOptions.forEach { restaurant ->
                     Button(
-                        onClick = { /* TODO */ },
+                        onClick = { onNextButtonClicked(restaurant) },
                         modifier = Modifier.widthIn(min = 250.dp),
                     ) {
-                        Text(stringResource(it.name))
+                        Text(stringResource(restaurant.name))
                     }
                 }
             }
@@ -79,6 +80,7 @@ fun StartOrderPreview(){
     BuffBitesTheme {
         StartOrderScreen(
             restaurantOptions = Datasource.restaurants,
+            onNextButtonClicked = {},
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
