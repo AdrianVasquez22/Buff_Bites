@@ -81,11 +81,11 @@ fun BuffBitesApp(
     Scaffold(
         topBar = {
             BuffBitesAppBar(
-            currentScreen = currentScreen,
-            canNavigateBack = navController.previousBackStackEntry != null,
-            navigateUp = {navController.navigateUp()}
-        )
-    }
+                currentScreen = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null,
+                navigateUp = { navController.navigateUp() }
+            )
+        }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsState()
 
@@ -97,8 +97,8 @@ fun BuffBitesApp(
             composable(route = BuffBitesScreen.Start.name) {
                 StartOrderScreen(
                     restaurantOptions = Datasource.restaurants,
-                    onNextButtonClicked = {
-                        viewModel.updateVendor(it)
+                    onNextButtonClicked = { restaurant ->
+                        viewModel.updateVendor(restaurant)
                         navController.navigate(BuffBitesScreen.Meal.name)
                     },
                     modifier = Modifier.fillMaxSize()
@@ -107,14 +107,16 @@ fun BuffBitesApp(
             composable(route = BuffBitesScreen.Meal.name) {
                 uiState.selectedVendor?.let { restaurant ->
                     ChooseMenuScreen(
+                        options = restaurant.menuItems,
+                        onSelectionChanged = { meal ->
+                            viewModel.updateMeal(meal)
+                        },
+                        onCancelButtonClicked = {
+                            resetAndNavigateToStart(viewModel, navController)
+                        },
                         onNextButtonClicked = {
                             navController.navigate(BuffBitesScreen.Delivery.name)
                         },
-                        onCancelButtonClicked = {
-                            cancelOrderAndNavigateToStart(viewModel, navController)
-                        },
-                        options = restaurant.menuItems,
-                        onSelectionChanged = { viewModel.updateMeal(it) },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -123,12 +125,14 @@ fun BuffBitesApp(
                 ChooseDeliveryTimeScreen(
                     subtotal = uiState.orderSubtotal,
                     options = uiState.availableDeliveryTimes,
-                    onSelectionChanged = { viewModel.updateDeliveryTime(it) },
-                    onNextButtonClicked = {
-                        navController.navigate(BuffBitesScreen.Summary.name)
+                    onSelectionChanged = { deliveryTime ->
+                        viewModel.updateDeliveryTime(deliveryTime)
                     },
                     onCancelButtonClicked = {
-                        cancelOrderAndNavigateToStart(viewModel, navController)
+                        resetAndNavigateToStart(viewModel, navController)
+                    },
+                    onNextButtonClicked = {
+                        navController.navigate(BuffBitesScreen.Summary.name)
                     }
                 )
             }
@@ -136,12 +140,12 @@ fun BuffBitesApp(
                 val context = LocalContext.current
                 OrderSummaryScreen(
                     orderUiState = uiState,
-                    onSendButtonClicked = { vendor: String, subject: String, summary: String ->
+                    onSendButtonClicked = { vendor, subject, summary ->
+                        shareOrder(context, vendor, subject, summary)
                         navController.navigate(BuffBitesScreen.Start.name)
-                        shareOrder(context, vendor = vendor , subject = subject, summary = summary)
                     },
                     onCancelButtonClicked = {
-                        cancelOrderAndNavigateToStart(viewModel, navController)
+                        resetAndNavigateToStart(viewModel, navController)
                     }
                 )
             }
@@ -149,20 +153,18 @@ fun BuffBitesApp(
     }
 }
 
-private fun cancelOrderAndNavigateToStart(
-    viewModel: OrderViewModel,
-    navController: NavHostController
-) {
+private fun resetAndNavigateToStart(viewModel: OrderViewModel, navController: NavHostController) {
     viewModel.resetOrder()
-    navController.popBackStack(BuffBitesScreen.Start.name, inclusive = false)
+    navController.navigate(BuffBitesScreen.Start.name) {
+        popUpTo(BuffBitesScreen.Start.name) { inclusive = true }
+    }
 }
 
 private fun shareOrder(context: Context, vendor: String, subject: String, summary: String) {
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, vendor)
-        putExtra(Intent.EXTRA_SUBJECT, subject)
         putExtra(Intent.EXTRA_TEXT, summary)
+        putExtra(Intent.EXTRA_SUBJECT, subject)
     }
 
     context.startActivity(

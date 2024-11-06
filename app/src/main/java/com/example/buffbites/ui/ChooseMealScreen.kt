@@ -62,7 +62,7 @@ fun ChooseMenuScreen(
         Spacer(modifier = Modifier.weight(1f))
         MenuScreenButtonGroup(
             selectedItemName = selectedItemName,
-            onCancelButtonClicked = { onCancelButtonClicked },
+            onCancelButtonClicked = { onCancelButtonClicked() },
             onNextButtonClicked = { onNextButtonClicked },
             modifier = Modifier
                 .fillMaxWidth()
