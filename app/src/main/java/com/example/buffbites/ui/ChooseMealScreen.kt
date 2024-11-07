@@ -35,8 +35,8 @@ import java.text.NumberFormat
 fun ChooseMenuScreen(
     options: List<MenuItem>,
     onSelectionChanged: (MenuItem) -> Unit,
-    onCancelButtonClicked: () -> Unit = {},
-    onNextButtonClicked: () -> Unit = {},
+    onNextButtonClicked: () -> Unit,
+    onCancelButtonClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedItemName by rememberSaveable { mutableStateOf("") }
@@ -63,7 +63,7 @@ fun ChooseMenuScreen(
         MenuScreenButtonGroup(
             selectedItemName = selectedItemName,
             onCancelButtonClicked = { onCancelButtonClicked() },
-            onNextButtonClicked = { onNextButtonClicked },
+            onNextButtonClicked = onNextButtonClicked,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -141,6 +141,8 @@ fun MenuScreenPreview() {
         ChooseMenuScreen(
             options = Datasource.restaurants[0].menuItems,
             onSelectionChanged = {},
+            onNextButtonClicked = {},
+            onCancelButtonClicked = {},
             modifier = Modifier
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())

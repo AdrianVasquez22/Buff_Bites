@@ -119,7 +119,6 @@ fun BuffBitesApp(
                         .padding(16.dp)
                         .verticalScroll(rememberScrollState())
                 )
-
             }
             composable(route = BuffBitesScreen.Delivery.name) {
                 ChooseDeliveryTimeScreen(
