@@ -3,8 +3,11 @@ package com.example.buffbites
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -105,21 +109,17 @@ fun BuffBitesApp(
                 )
             }
             composable(route = BuffBitesScreen.Meal.name) {
-                uiState.selectedVendor?.let { restaurant ->
-                    ChooseMenuScreen(
-                        options = restaurant.menuItems,
-                        onSelectionChanged = { meal ->
-                            viewModel.updateMeal(meal)
-                        },
-                        onCancelButtonClicked = {
-                            resetAndNavigateToStart(viewModel, navController)
-                        },
-                        onNextButtonClicked = {
-                            navController.navigate(BuffBitesScreen.Delivery.name)
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                ChooseMenuScreen(
+                    options = uiState.selectedVendor?.menuItems ?: listOf(),
+                    onSelectionChanged = { viewModel.updateMeal(it) },
+                    onNextButtonClicked = { navController.navigate(BuffBitesScreen.Delivery.name) },
+                    onCancelButtonClicked = { cancelOrderAndNavigateToStart(viewModel, navController) },
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                )
+
             }
             composable(route = BuffBitesScreen.Delivery.name) {
                 ChooseDeliveryTimeScreen(
@@ -129,7 +129,7 @@ fun BuffBitesApp(
                         viewModel.updateDeliveryTime(deliveryTime)
                     },
                     onCancelButtonClicked = {
-                        resetAndNavigateToStart(viewModel, navController)
+                        cancelOrderAndNavigateToStart(viewModel, navController)
                     },
                     onNextButtonClicked = {
                         navController.navigate(BuffBitesScreen.Summary.name)
@@ -145,7 +145,7 @@ fun BuffBitesApp(
                         navController.navigate(BuffBitesScreen.Start.name)
                     },
                     onCancelButtonClicked = {
-                        resetAndNavigateToStart(viewModel, navController)
+                        cancelOrderAndNavigateToStart(viewModel, navController)
                     }
                 )
             }
@@ -153,7 +153,7 @@ fun BuffBitesApp(
     }
 }
 
-private fun resetAndNavigateToStart(viewModel: OrderViewModel, navController: NavHostController) {
+private fun cancelOrderAndNavigateToStart(viewModel: OrderViewModel, navController: NavHostController) {
     viewModel.resetOrder()
     navController.navigate(BuffBitesScreen.Start.name) {
         popUpTo(BuffBitesScreen.Start.name) { inclusive = true }
@@ -163,6 +163,7 @@ private fun resetAndNavigateToStart(viewModel: OrderViewModel, navController: Na
 private fun shareOrder(context: Context, vendor: String, subject: String, summary: String) {
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, vendor)
         putExtra(Intent.EXTRA_TEXT, summary)
         putExtra(Intent.EXTRA_SUBJECT, subject)
     }
